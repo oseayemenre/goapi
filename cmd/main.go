@@ -5,20 +5,27 @@ import (
 	"net/http"
 )
 
-type server struct {
+type api struct {
 	addr string
 }
 
-func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request){
-	w.Write([]byte("Hello from the server"))
+func (a *api) getHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Home Route"))
 }
 
 func main() {
-	s := &server{
-		addr: ":8080",
+	api:=&api{addr: "8000"}
+	
+	mux := http.NewServeMux()
+
+	svr := http.Server{
+		Addr: api.addr,
+		Handler: mux,
 	}
 
-	if err := http.ListenAndServe(s.addr, s); err != nil {
-		log.Fatal(err)	
+	mux.HandleFunc("GET /home", api.getHandler)
+
+	if err := svr.ListenAndServe(); err != nil {
+		log.Panic(err)
 	}
 }
