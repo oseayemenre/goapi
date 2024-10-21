@@ -17,9 +17,9 @@ func main() {
 		log.Fatal("PORT is not found in the environment")
 	}
 
-	router := chi.NewRouter()
-
-	router.Use(cors.Handler(cors.Options{
+	r := chi.NewRouter()
+	
+	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"http://*", "https://*"},
 		AllowedMethods: []string{"GET", "POST", "PATCH", "DELETE"},
 		AllowedHeaders: []string{"*"},
@@ -28,13 +28,19 @@ func main() {
 		MaxAge: 300,
 	}))
 
-	svr := http.Server{
+	tr := chi.NewRouter()
+	tr.Get("/", handlerTest)
+	tr.Get("/err", handlerTestError)
+
+	r.Mount("/health", tr)
+
+	s := http.Server{
 		Addr: ":" + port,
-		Handler: router,
+		Handler: r,
 	}
 
 	log.Printf("Server starting on port %v", port)
-	if err := svr.ListenAndServe(); err != nil {
+	if err := s.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
