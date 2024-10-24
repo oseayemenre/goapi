@@ -7,23 +7,31 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users(id, name)
-VALUES ($1, $2)
+INSERT INTO users(id, name, createdAt, updatedAt)
+VALUES ($1, $2, $3, $4)
 RETURNING id, name, createdat, updatedat
 `
 
 type CreateUserParams struct {
-	ID   uuid.UUID
-	Name string
+	ID        uuid.UUID
+	Name      string
+	Createdat time.Time
+	Updatedat time.Time
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.ID, arg.Name)
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.ID,
+		arg.Name,
+		arg.Createdat,
+		arg.Updatedat,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
